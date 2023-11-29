@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="msapplication-TileColor" content="#ffffff">
+    <meta name="msapplication-TileImage" content="/ms-icon-144x144.png">
+    <meta name="theme-color" content="#ffffff">
+    <!--<meta name="viewport" content="width=device-width, initial-scale=1.0">  ORIGINAL CHATGPT4LINE! -->
+    <!--lines below utnil title are from default index.html file-->
+    <!--<link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=PT+Serif|Open+Sans:300,400,600,700,800">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"> -->
+    <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
+    <link rel="manifest" href="/manifest.json">
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, shrink-to-fit=no"
+    />
+    <title>Probabilistic Learning Task</title>
+    <style>
+        body, html {
+            height: 100%;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: Arial, sans-serif;
+            background-color: #2d2d2d;
+        }
+
+        #game-container {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            color: white;
+        }/*alternatively, use just 'text-align: center;'' but this shifts game-container to the right  */ 
+
+        .fractal {
+            max-width: 100%; /* Adjusted for three images */
+            height: auto;
+            margin: 0 10px; /* Reduced margin */
+            display: inline-block;
+        }
+
+        #feedback, #points {
+            display: none;
+            font-size: 24px;
+            margin-top: 20px;
+        }
+
+        #instruction {
+            display: none;
+            font-size: 20px;
+            margin-bottom: 20px;
+            color: white;
+        }
+        #instruction-screen1, #instruction-screen2, #instruction-screen3 {
+            text-align: center;
+            color: white;
+            position: fixed;
+            top: 20%; /* Adjust as needed */
+            left: 50%;
+            transform: translate(-50%, -20%);
+            max-width: 80%;
+        }
+        .fractals-container {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+        }   
+
+        .instruction-fractal {
+            max-width: 100px;
+            height: auto;
+            margin: 10px;
+        }
+
+        #fixation-cross {
+            font-size: 24px;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            display: none;
+            color: white;
+        }
+        .indicator {
+             width: 200px;
+             height: 50px; /* Adjusted height */
+             background-color: orange;
+             display: none;
+             position: absolute;
+             top: calc(50% + 150px); /* Position it below the image */
+        }
+        /* .indicator {
+            width: 50px;
+            height: 300px;
+            background-color: orange;
+            display: none;
+            position: absolute;
+        } */
+        #left-indicator {
+            right: calc(69%); /* Adjust based on layout; 69% seems to be best */
+        }
+
+        #middle-indicator {
+          left: 50%;
+          transform: translateX(-50%); /* Center below the middle fractal */
+        }
+
+        #right-indicator {
+            left: calc(69%); /* Adjust based on layout; 69% seems to be best */
+        }
+
+        /* #left-indicator {
+            right: calc(60% + 160px);
+        }
+
+        #right-indicator {
+            left: calc(60% + 160px);
+        } */
+
+        .positive-feedback {
+            color: green;
+        }
+
+        .negative-feedback {
+            color: red;
+        }
+
+        #points {
+            color: white;
+        }
+    </style>
+</head>
+
+<body>
+
+<div id="root"></div>
+
+<!-- Instruction Screen 1 -->
+<div id="instruction-screen1" style="display: none;">
+    <h2>Welcome to the Lucky Picture Selection game!</h2>
+    <p>You will be presented with 3 pictures on the screen. You will be asked to pick one.</p>
+    <p>Every time you pick a picture, you either win $0.75 or $0.25</p>
+    <p>Your goal is to win as much money as possible</p>
+    <p>One of the  pictures is always the "Lucky Picture" that is more likely than the other two to give you $0.75 instead of $0.25. You will need to experiment to figure out which one is lucky</p>
+    <p>As the game goes on, the picture that is the "Lucky Picture" (the picture that gives more money more often) will CHANGE!</p>
+    <p>You won't know when the lucky picture has changed! You'll have to figure it out when the picture you thought was lucky stops giving you $0.75 as often as it did before!</p>
+    <p>*Press any key on your keyboard to continue*</p>
+    <!-- Fractals for display -->
+    <div class="fractals-container"></div>
+        <img src="https://raw.githubusercontent.com/maxsupergreenwald/PRLResources/main/resources/Fractal11.png" class="instruction-fractal">
+        <img src="https://raw.githubusercontent.com/maxsupergreenwald/PRLResources/main/resources/Fractal12.png" class="instruction-fractal">
+        <img src="https://raw.githubusercontent.com/maxsupergreenwald/PRLResources/main/resources/Fractal14.png" class="instruction-fractal">
+    </div>
+</div>
+
+<!-- Instruction Screen 2 -->
+<div id="instruction-screen2" style="display: none;">
+    <p>One of the  pictures is always the "Lucky Picture" that is more likely than the other two to give you $0.75 instead of $0.25. You will need to experiment to figure out which one is lucky</p>
+    <p>As the game goes on, the picture that is the "Lucky Picture" (the picture that gives more money more often) will CHANGE!</p>
+    <p>You won't know when the lucky picture has changed! You'll have to figure it out when the picture you thought was lucky stops giving you $0.75 as often as it did before!</p>
+    <p>*Press any key on your keyboard to continue*</p>
+    <!-- Fractals for display -->
+    <div class="fractals-container"></div>
+        <img src="https://raw.githubusercontent.com/maxsupergreenwald/PRLResources/main/resources/Fractal11.png" class="instruction-fractal">
+        <img src="https://raw.githubusercontent.com/maxsupergreenwald/PRLResources/main/resources/Fractal12.png" class="instruction-fractal">
+        <img src="https://raw.githubusercontent.com/maxsupergreenwald/PRLResources/main/resources/Fractal14.png" class="instruction-fractal">
+    </div>
+</div>
+
+<!-- Instruction Screen 3 -->
+<div id="instruction-screen3" style="display: none;">
+    <p>Press '1' for the picture on the LEFT,  '2' for the picture in the MIDDLE, and '3' for the picture on the RIGHT</p>
+    <p>The pictures shuffle positions on your screen every 5 times you make a choice, so pay attention to which one you are picking!</p>
+    <p>REMEMBER: you want to make sure you are picking the "Lucky Picture" that is more likely than the other two to give you $0.75 instead of $0.25.</p>
+    <p>AND remember: The picture that is the "Lucky Picture" will CHANGE!</p>    
+    <p>When you are ready to begin, please *press any key on your keyboard to start the game*</p>
+    <!-- Fractals for display -->
+    <div class="fractals-container"></div>
+        <img src="https://raw.githubusercontent.com/maxsupergreenwald/PRLResources/main/resources/Fractal11.png" class="instruction-fractal">
+        <img src="https://raw.githubusercontent.com/maxsupergreenwald/PRLResources/main/resources/Fractal12.png" class="instruction-fractal">
+        <img src="https://raw.githubusercontent.com/maxsupergreenwald/PRLResources/main/resources/Fractal14.png" class="instruction-fractal">
+    </div>
+</div>
+
+<div id="game-container" style="display: none;">
+    <div id="instruction">Pick the luckiest picture to win the most money!</div>
+    <div id="fractals">
+        <div class="indicator" id="left-indicator"></div>
+        <img src="https://raw.githubusercontent.com/maxsupergreenwald/PRLResources/main/resources/Fractal11.png" class="fractal" id="fractal1">
+        <img src="https://raw.githubusercontent.com/maxsupergreenwald/PRLResources/main/resources/Fractal12.png" class="fractal" id="fractal2">
+        <img src="https://raw.githubusercontent.com/maxsupergreenwald/PRLResources/main/resources/Fractal14.png" class="fractal" id="fractal3">
+        <div class="indicator" id="right-indicator"></div>
+    </div>
+    <div id="feedback"></div>
+    <div id="points">Winnings: 0</div>
+</div>
+
+<div class="indicator" id="middle-indicator"></div>
+
+<div id="fixation-cross">+</div>
+
+<div id="completion-message" style="display: none;">
+    Task complete! Thank you for your time. You will be redirected back to RedCap soon.
+</div>
+
+<script src="script.js"></script>
+
+</body>
+
+</html>

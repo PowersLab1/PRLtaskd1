@@ -1,0 +1,15 @@
+{
+  "taskVersion": "1.0.0",
+  "taskName": "prltaskd1",
+  "debug": false,
+  "awsLambda": {
+    "saveTaskData": {
+      "host": "de8cnjde61.execute-api.us-east-2.amazonaws.com",
+      "path": "/default/saveTaskData"
+    },
+    "fetchLink": {
+      "host": "3pnzb6n9vf.execute-api.us-east-2.amazonaws.com",
+      "path": "/default/fetchLink"
+    }
+  }
+}
