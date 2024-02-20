@@ -14,7 +14,6 @@ require('questlib');
 
 class LabJsWrapper extends Component {
   constructor(props) {
-    console.log('LabJsWrapperconstructor');
     super(props);
 
     // Parse get params for encrypted metadata
@@ -34,19 +33,13 @@ class LabJsWrapper extends Component {
 
     if (!_.isUndefined(this.state.encryptedMetadata)) {
       this.addScript(process.env.PUBLIC_URL + '/external/lab.js', () => {
-        // If we add this script tag before lab.js loads, then the
-        // script will not be able to find the lab module.
-        this.addScript(process.env.PUBLIC_URL + '/script.js');//original wrapper uses  '/script.js' -- tried w/index.html containing whole script but didn't work
+        this.addScript(process.env.PUBLIC_URL + '/script.js');
       });
     }
   }
 
-  // labJsData should be parsed
   packageDataForExport(labJsData) {
     const exportData = {};
-    console.log('packageDataForExport');
-    console.log(labJsData);
-
     exportData.encrypted_metadata = this.state.encryptedMetadata;
     exportData.taskName = config.taskName;
     exportData.taskVersion = config.taskVersion;
@@ -58,76 +51,31 @@ class LabJsWrapper extends Component {
   processLabJsData(labJsData) {
     return labJsData;
   }
-    //const processedData = []; //THIS IS SUPPOSED TO BE MODIFIED TO MAKE SURE THAT IT CONTAINS ALL THE DATA WE NEED BUT LATER LINE labJsData[0] suggests only 1st object returned!
- //here are the arrays that I would tell it to make sure it's keeping
-   
-    
-      // Always keep entry 0 of labjs data since it contains useful metadata
-   // processedData.push(labJsData[0]);
 
-    // Do other processing here
-    // processedData.push(...);
-
-   // processedData.push()
-
-   // return processedData;
-  //}
-
-  componentDidMount() {
-    console.log('in compondentDidMount');
-    //console.log(that.state.encryptedMetadata);//this was in the original code
-    
-    var that = this;
-    window.addEventListener('message', function(event) {
-      console.log('in EventListener');
-
-      if (event.data.type === 'labjs.data') {
-        const parsedData = JSON.parse(event.data.json);
-        console.log('in componentDidMount -- type = labjs.data');
-        // Print out debugging info if flag is set or we're on localhost
-        if (config.debug || isLocalhost) {
-          console.log(parsedData);
-          console.log(that.processLabJsData(parsedData));
+  async sendDataWithRetry(data, retries = 5, delay = 1000) {
+    for (let i = 0; i < retries; i++) {
+      try {
+        await aws_saveTaskData(this.state.encryptedMetadata, this.packageDataForExport(data));
+        console.log('Data sent successfully');
+        if (this.surveyUrl) {
+          this.setState({link: this.surveyUrl});
+        } else {
+          aws_fetchLink(this.state.encryptedMetadata).then(
+            (link) => this.setState({link: link})
+          );
         }
-
-        // If localhost, we're done at this point
-        if (isLocalhost) {
-          console.log('in islocalhost');
-          console.log(that.surveyUrl);
-          if (that.surveyUrl) {
-            console.log('in that.surveyUrl');
-            that.setState({link: that.surveyUrl});
-          }
-          return;
+        return; // Exit if successful
+      } catch (error) {
+        console.log(`Attempt ${i + 1} failed: ${error}`);
+        this.setState({sendingData: true}); // Update UI to show retrying message
+        if (i < retries - 1) {
+          await new Promise(resolve => setTimeout(resolve, delay)); // Wait before retrying
+          delay *= 2; // Exponential backoff
         }
-        console.log('in componentDidMount -- after if statements');
-        console.log(that.state.encryptedMetadata);
-        console.log(parsedData);
-        that.setState({sendingData: true});
-        console.log('logging this')
-        console.log(this); //added this for debugging
-        console.log('logging that')
-        console.log(that); //added this for debugging
-        console.log('sending request')
-        aws_saveTaskData(that.state.encryptedMetadata, that.packageDataForExport(parsedData)).then(
-          () => {
-            console.log('sent data')
-            console.log(that.surveyUrl) //added for debugging
-            if (that.surveyUrl) {
-              that.setState({link: that.surveyUrl});
-            } else {
-              aws_fetchLink(that.state.encryptedMetadata).then(
-                (link) => that.setState({link: link})
-              ); //wise to add some additional handling here for when backend stuff goes down -- handling errors
-            }
-          }
-        );
       }
-      aws_fetchLink(that.state.encryptedMetadata).then(
-        (link) => that.setState({link: link})
-      );
-    });
-  
+    }
+    console.error('All attempts to send data failed');
+    this.setState({sendingData: 'error'}); // Update UI to show error message
   }
 
   addScript(src, callback) {
@@ -153,16 +101,16 @@ class LabJsWrapper extends Component {
 
     return (
       <div>
-        <div className="container fullscreen" data-labjs-section="main" style={{visibility: this.state.sendingData ? 'hidden' : 'visible'}}>
+        <div className="container fullscreen" data-labjs-section="main" style={{visibility: this.state.sendingData === false ? 'visible' : 'hidden'}}>
           <main className="content-vertical-center content-horizontal-center">
-            {/* <div>
-              <h2>Loading Experiment</h2>
-              <p>The experiment is loading and should start in a few seconds</p>
-            </div> */}
           </main>
         </div>
-        <div className="center" style={{visibility: this.state.sendingData ? 'visible' : 'hidden'}}>
-          <h2>Saving data... do not exit window</h2>
+        <div className="center" style={{visibility: this.state.sendingData !== false ? 'visible' : 'hidden'}}>
+          {this.state.sendingData === 'error' ? (
+            <h2>There was an error saving your data. Please check your internet connection and then refresh the page -- you may need to repeat the game if internet connection was lost during the game.</h2>
+          ) : (
+            <h2>Saving data -- do not close the window.</h2>
+          )}
         </div>
       </div>
     );

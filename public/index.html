@@ -144,12 +144,13 @@
 <div id="instruction-screen1" style="display: none;">
     <h2>Welcome to the Lucky Picture Selection game!</h2>
     <p>You will be presented with 3 pictures on the screen. You will be asked to pick one.</p>
-    <p>Each picture has a certain probability of giving you 10 points or 2 points</p>
+    <p>Each time you pick, you get either 10 or 2 points</p>
+    <p>Each picture gives both 10 points and 2 points but <b>with different probabilites</b> (ex. one gives 10pts half the time, another 10% of the time)</p>
     <p>Your goal is to win as many points as possible -- the top 20% of players get $2 extra compensation at the end of the study!</p>
-    <p>One of the  pictures is always the "Lucky Picture" that is much more likely than the other two to give you 10 points instead of 2 points. You will need to experiment to figure out which one is lucky</p>
-    <p>As the game goes on, the picture that is the "Lucky Picture" (the picture that gives more money more often) will CHANGE!</p>
-    <p>You won't know when the lucky picture has changed! You'll have to figure it out when the picture you thought was lucky stops giving you 10 points as often as it did before!</p>
-    <p>*Press any key on your keyboard to continue*</p>
+    <p>One of the pictures is always the "Lucky Picture" that is much more LIKELY than the other two to give you 10 points instead of 2 points. You'll need to experiment to decide which one is lucky!</p>
+    <p>As the game goes on, the picture that is <b>the "Lucky Picture" will occasionally CHANGE</b>... But you won't know when! </p>
+    <p>You'll have to figure it out when the picture you thought was lucky starts giving you 10 points LESS OFTEN! (Ex. giving you 10pts 30% of the time instead of 80% of the time)</p>
+    <p><i>*Press any key on your keyboard to continue*</i></p>
     <!-- Fractals for display -->
     <div class="fractals-container"></div>
         <img src="https://raw.githubusercontent.com/maxsupergreenwald/PRLResources/main/resources/Fractal11.png" class="instruction-fractal">
@@ -175,8 +176,9 @@
 <!-- Instruction Screen 3 -->
 <div id="instruction-screen3" style="display: none;">
     <p>With 1 finger from YOUR DOMINANT HAND on each key; Press '1' for the picture on the LEFT,  '2' for the picture in the MIDDLE, and '3' for the picture on the RIGHT</p>
-    <p>The pictures shuffle positions after every choice, so pay attention to which one you are picking!</p>
-    <p>REMEMBER: you want to make sure you are picking the "Lucky Picture" that is more likely than the other two to give you 10 points instead of 2 points.</p>
+    <p>The pictures change positions regularly, so pay attention to which one you are picking!</p>
+    <p>REMEMBER: <b>all pictures give both 10 and 2 points</b> based on <i>chance</i> -- some give 10 points <i>more often</i></p>
+    <p>You want to make sure you are picking the "Lucky Picture" that <b>gives 10 points more often than 2 points.</b></p>
     <p>AND remember: The picture that is the "Lucky Picture" will CHANGE!</p>    
     <p>When you are ready to begin, please *press any key on your keyboard to start the game*</p>
     <!-- Fractals for display -->
@@ -205,7 +207,8 @@
 <div id="fixation-cross">+</div>
 
 <div id="completion-message" style="display: none;">
-    Task complete! Thank you for your time. You will be redirected back to RedCap soon.
+    <p>Game complete! Thank you for your time. You will be redirected back to RedCap soon.</p>
+    <p>If stuck on this screen, please check your internet connection and refresh the page. You may need to replay the game</p>
 </div>
 
 <script src="script.js"></script>
