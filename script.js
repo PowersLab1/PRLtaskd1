@@ -1,3 +1,20 @@
+import React, {Component} from 'react';
+import { Redirect } from "react-router-dom";
+import {aws_saveTaskData, aws_fetchLink} from "../src/lib/aws_lambda";
+import {isLocalhost} from "../src/lib/utils";
+
+// // FIRST check local storage to see if the user's data was saved already and just needs to be sent again because aws function fucked up
+// function handleLocalStorageData() {
+//     const jsonData = localStorage.getItem('labjs.data');
+//     if (jsonData) {
+//         aws_saveTaskData(jsonData).then(() => {
+//             localStorage.removeItem('labjs.data'); // Clear data from local storage
+//             aws_fetchLink().then(link => window.location.href = link); // Redirect user
+//         });
+//     }
+// }
+// handleLocalStorageData();
+
 // Task parameters one might want to change
 const interTrialInterval = 500; // Time in milliseconds for the fixation cross inter-trial-interval
 const feedbackDisplayTime = 1000; // Time in milliseconds for the feedback display
@@ -231,6 +248,8 @@ function makeBlocks(nTrials, nBlocks, meanTrialsPerBlock, maxTrialsPerBlock, min
 const blocks = makeBlocks(totalTrials, totalBlocks, meanTrialsPerBlock, maxTrialsPerBlock, minTrialsPerBlock);
 console.log(blocks)
 
+
+
 //defining the game object; most functions live within it.
 const game = {
     currentState: "choosing",
@@ -432,6 +451,7 @@ const game = {
         if (this.trials.length === this.trialLimits.reduce((a, b) => a + b, 0)) {
             console.log(this.trials);
                 console.log('Finished the game');
+                localStorage.setItem('labjs.data', jsonData); // Save data to local storage
                 window.postMessage({ //used to be window.parent.postMessage...
                     type: 'labjs.data',
                     json: JSON.stringify(this.trials)
