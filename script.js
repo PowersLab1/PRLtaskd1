@@ -439,6 +439,7 @@ const game = {
 
                 // Save the data in local storage
                 localStorage.setItem('taskData', trialsDataJson);
+                console.log('After saving to local storage:', localStorage.getItem('taskData'));
                 //send data as Message for labjswrapper to nab in event listener
                 window.postMessage({ 
                     type: 'labjs.data',
