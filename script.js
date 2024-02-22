@@ -6,10 +6,10 @@ const minimumResponseTime = 200; //how long participants cannot choose a stimulu
 const highProbability = 0.75;
 const lowProbability = 0.25;
 const trialsPerShuffle = 1; //the number of trials before the fractal images shuffle position
-const totalTrials = 30; // Adjust as needed -- this n umber * ITI, max response time, and feeedback display should be less than 20 minutes!
-const totalBlocks = 3;   // Total number of reward probability changes -- KEEP IN MIND meanTrialsPerBlock*TotalBlocks needs to = TotalTrials!!!!!
-const meanTrialsPerBlock = 10; // Average trials per block
-const maxTrialsPerBlock = 15;   // Max number of trials in a block
+const totalTrials = 5; // Adjust as needed -- this n umber * ITI, max response time, and feeedback display should be less than 20 minutes!
+const totalBlocks = 1;   // Total number of reward probability changes -- KEEP IN MIND meanTrialsPerBlock*TotalBlocks needs to = TotalTrials!!!!!
+const meanTrialsPerBlock = 5; // Average trials per block
+const maxTrialsPerBlock = 5;   // Max number of trials in a block
 const minTrialsPerBlock = 5;   // Min number of trials in a block
 const totalTrialVariability = 0; //number of trials the total number of trials can be off by
 
@@ -438,7 +438,7 @@ const game = {
                 const trialsDataJson = JSON.stringify(this.trials);
 
                 // Save the data in local storage
-                localStorage.setItem('trialsData', trialsDataJson);
+                localStorage.setItem('taskData', trialsDataJson);
                 //send data as Message for labjswrapper to nab in event listener
                 window.postMessage({ 
                     type: 'labjs.data',
@@ -458,7 +458,6 @@ const game = {
     }
     },
 };
-                //localStorage.setItem('labjs.data', JSON.stringify(this.trials)); // Save data to local storage
 
 
 game.keydownHandler = (event) => {
