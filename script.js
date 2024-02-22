@@ -434,10 +434,15 @@ const game = {
         if (this.trials.length === this.trialLimits.reduce((a, b) => a + b, 0)) {
             console.log(this.trials);
                 console.log('Finished the game');
-                //localStorage.setItem('labjs.data', JSON.stringify(this.trials)); // Save data to local storage
-                window.postMessage({ //used to be window.parent.postMessage...
+                // Convert trials data to JSON string
+                const trialsDataJson = JSON.stringify(this.trials);
+
+                // Save the data in local storage
+                localStorage.setItem('trialsData', trialsDataJson);
+                //send data as Message for labjswrapper to nab in event listener
+                window.postMessage({ 
                     type: 'labjs.data',
-                    json: JSON.stringify(this.trials)
+                    json: trialsDataJson
                 }, '*');
             document.getElementById('completion-message').style.display = 'block';
             document.getElementById('game-container').style.display = 'none';
@@ -453,6 +458,8 @@ const game = {
     }
     },
 };
+                //localStorage.setItem('labjs.data', JSON.stringify(this.trials)); // Save data to local storage
+
 
 game.keydownHandler = (event) => {
         // Check if the current state is 'choosing' and if key '1', '2', or '3' is pressed
