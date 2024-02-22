@@ -434,7 +434,7 @@ const game = {
         if (this.trials.length === this.trialLimits.reduce((a, b) => a + b, 0)) {
             console.log(this.trials);
                 console.log('Finished the game');
-                localStorage.setItem('labjs.data', jsonData); // Save data to local storage
+                //localStorage.setItem('labjs.data', JSON.stringify(this.trials)); // Save data to local storage
                 window.postMessage({ //used to be window.parent.postMessage...
                     type: 'labjs.data',
                     json: JSON.stringify(this.trials)
