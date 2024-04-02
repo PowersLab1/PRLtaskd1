@@ -3,8 +3,8 @@ const interTrialInterval = 500; // Time in milliseconds for the fixation cross i
 const feedbackDisplayTime = 1000; // Time in milliseconds for the feedback display
 const maximumResponseTime = 3000; // Time in milliseconds until trial ends w/o  points and tells them they're too slow
 const minimumResponseTime = 200; //how long participants cannot choose a stimulus (prevents button mashing)
-const highProbability = 0.75;
-const lowProbability = 0.25;
+const highProbability = 0.85;
+const lowProbability = 0.15;
 const trialsPerShuffle = 1; //the number of trials before the fractal images shuffle position
 let totalTrials = 130; // Adjust as needed -- this n umber * ITI, max response time, and feeedback display should be less than 20 minutes! Currently 15.75 min. Changing to 2.5 -> 14 min. 2.75 -> 14.875
 let totalBlocks = 10;   // Total number of reward probability changes -- KEEP IN MIND meanTrialsPerBlock*TotalBlocks needs to = TotalTrials!!!!!
@@ -505,9 +505,15 @@ const game = {
             if (this.trials.length === this.trialLimits.reduce((a, b) => a + b, 0)) {
                 console.log(this.trials);
                     console.log('Finished the game');
-                    window.postMessage({ //used to be window.parent.postMessage...
+                    // Convert trials data to JSON string
+                    const trialsDataJson = JSON.stringify(this.trials);
+                    // Save the data in session storage
+                    sessionStorage.setItem('taskData', trialsDataJson);
+                    console.log('Saving to session storage:');
+                    //send data as Message for labjswrapper to nab in event listener
+                    window.postMessage({ 
                         type: 'labjs.data',
-                        json: JSON.stringify(this.trials)
+                        json: trialsDataJson
                     }, '*');
                 document.getElementById('completion-message').style.display = 'block';
                 document.getElementById('game-container').style.display = 'none';

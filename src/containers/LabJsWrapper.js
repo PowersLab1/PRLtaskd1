@@ -14,6 +14,7 @@ require('questlib');
 
 class LabJsWrapper extends Component {
   constructor(props) {
+    console.log('LabJsWrapperconstructor');
     super(props);
 
     // Parse get params for encrypted metadata
@@ -33,13 +34,19 @@ class LabJsWrapper extends Component {
 
     if (!_.isUndefined(this.state.encryptedMetadata)) {
       this.addScript(process.env.PUBLIC_URL + '/external/lab.js', () => {
-        this.addScript(process.env.PUBLIC_URL + '/script.js');
+        // If we add this script tag before lab.js loads, then the
+        // script will not be able to find the lab module.
+        this.addScript(process.env.PUBLIC_URL + '/script.js');//original wrapper uses  '/script.js' -- tried w/index.html containing whole script but didn't work
       });
     }
   }
 
+  // labJsData should be parsed
   packageDataForExport(labJsData) {
     const exportData = {};
+    console.log('packageDataForExport');
+    console.log(labJsData);
+
     exportData.encrypted_metadata = this.state.encryptedMetadata;
     exportData.taskName = config.taskName;
     exportData.taskVersion = config.taskVersion;
@@ -51,32 +58,95 @@ class LabJsWrapper extends Component {
   processLabJsData(labJsData) {
     return labJsData;
   }
+    //const processedData = []; //THIS IS SUPPOSED TO BE MODIFIED TO MAKE SURE THAT IT CONTAINS ALL THE DATA WE NEED BUT LATER LINE labJsData[0] suggests only 1st object returned!
+ //here are the arrays that I would tell it to make sure it's keeping
+   
+    
+      // Always keep entry 0 of labjs data since it contains useful metadata
+   // processedData.push(labJsData[0]);
 
-  async sendDataWithRetry(data, retries = 5, delay = 1000) {
-    for (let i = 0; i < retries; i++) {
-      try {
-        await aws_saveTaskData(this.state.encryptedMetadata, this.packageDataForExport(data));
-        console.log('Data sent successfully');
-        if (this.surveyUrl) {
-          this.setState({link: this.surveyUrl});
-        } else {
-          aws_fetchLink(this.state.encryptedMetadata).then(
-            (link) => this.setState({link: link})
-          );
+    // Do other processing here
+    // processedData.push(...);
+
+   // processedData.push()
+
+   // return processedData;
+  //}
+
+  componentDidMount() {
+    
+    console.log('This is the latest labjswrapper.js')
+    var that = this;
+
+    const taskData = sessionStorage.getItem('taskData');
+    if (taskData) {
+      console.log('taskData found in sessionStorage');
+      const parsedData = JSON.parse(taskData);
+      // If localhost, we're done at this point
+      if (isLocalhost) {
+        console.log('in islocalhost');
+        console.log(that.surveyUrl);
+        if (that.surveyUrl) {
+          console.log('in that.surveyUrl');
+          that.setState({link: that.surveyUrl});
         }
-        return; // Exit if successful
-      } catch (error) {
-        console.log(`Attempt ${i + 1} failed: ${error}`);
-        this.setState({sendingData: true}); // Update UI to show retrying message
-        if (i < retries - 1) {
-          await new Promise(resolve => setTimeout(resolve, delay)); // Wait before retrying
-          delay *= 2; // Exponential backoff
-        }
+        return;
       }
+      that.setState({sendingData: true});
+      console.log('Im tryna call aws cuz i have session storage stuff');
+      that.setState({sendingData: true});
+      that.saveTaskDataWithRetry(parsedData, 11); // second number = how many attempts to make before giving up +1
     }
-    console.error('All attempts to send data failed');
-    this.setState({sendingData: 'error'}); // Update UI to show error message
+
+    window.addEventListener('message', function(event) {
+      if (event.data.type === 'labjs.data') {
+        const parsedData = JSON.parse(event.data.json);
+
+        if (isLocalhost) {
+          if (that.surveyUrl) {
+            console.log('in that.surveyUrl');
+            that.setState({link: that.surveyUrl});
+          }
+          return;
+        }
+        
+        that.setState({sendingData: true});
+        that.saveTaskDataWithRetry(parsedData, 11); // second number = how many attempts to make before giving up +1
+      }
+    });
   }
+
+  saveTaskDataWithRetry(parsedData, attempts) {
+    const that = this;
+    console.log('new saveTaskData called')
+    aws_saveTaskData(that.state.encryptedMetadata, that.packageDataForExport(parsedData)).then(() => {
+      // Success path
+      that.handleDataSaveSuccess();
+    }).catch((error) => {
+      if (attempts > 1) {
+        setTimeout(() => {
+          console.log("Retrying to save task data...");
+          that.saveTaskDataWithRetry(parsedData, attempts - 1);
+        }, 2000); // Retry after 1 second delay
+      } else {
+        // Handle failure after retries
+        console.error("Failed to save task data after retries:", error);
+        // Consider alerting the user or other recovery options here
+      }
+    });
+  }
+
+  handleDataSaveSuccess() {
+    // Existing logic for handling successful data save...
+    if (this.surveyUrl) {
+      this.setState({link: this.surveyUrl});
+    } else {
+      aws_fetchLink(this.state.encryptedMetadata).then(
+        (link) => this.setState({link: link})
+      );
+    }
+  }
+
 
   addScript(src, callback) {
     const script = document.createElement("script");
@@ -101,16 +171,17 @@ class LabJsWrapper extends Component {
 
     return (
       <div>
-        <div className="container fullscreen" data-labjs-section="main" style={{visibility: this.state.sendingData === false ? 'visible' : 'hidden'}}>
+        <div className="container fullscreen" data-labjs-section="main" style={{visibility: this.state.sendingData ? 'hidden' : 'visible'}}>
           <main className="content-vertical-center content-horizontal-center">
+            {/* <div>
+              <h2>Loading Experiment</h2>
+              <p>The experiment is loading and should start in a few seconds</p>
+            </div> */}
           </main>
         </div>
-        <div className="center" style={{visibility: this.state.sendingData !== false ? 'visible' : 'hidden'}}>
-          {this.state.sendingData === 'error' ? (
-            <h2>There was an error saving your data. Please check your internet connection and then refresh the page -- you may need to repeat the game if internet connection was lost during the game.</h2>
-          ) : (
-            <h2>Saving data -- do not close the window.</h2>
-          )}
+        <div className="center" style={{visibility: this.state.sendingData ? 'visible' : 'hidden'}}>
+          <h2>Saving data... do not exit window. Check internet and Refresh if stuck here for over 30 seconds.</h2>
+          <p>If you lost internet connection during the game, then the game will restart and you will need to play again.</p>
         </div>
       </div>
     );
