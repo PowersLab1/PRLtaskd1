@@ -78,7 +78,7 @@ class LabJsWrapper extends Component {
     console.log('This is the latest labjswrapper.js')
     var that = this;
 
-    const taskData = sessionStorage.getItem('taskData');
+    const taskData = sessionStorage.getItem('PRLtaskd1taskData');
     if (taskData) {
       console.log('taskData found in sessionStorage');
       const parsedData = JSON.parse(taskData);
@@ -99,7 +99,7 @@ class LabJsWrapper extends Component {
     }
 
     window.addEventListener('message', function(event) {
-      if (event.data.type === 'labjs.data') {
+      if (event.data.type === 'PRLtaskd1labjs.data') {
         const parsedData = JSON.parse(event.data.json);
 
         if (isLocalhost) {
