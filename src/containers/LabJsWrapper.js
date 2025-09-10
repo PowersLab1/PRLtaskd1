@@ -78,9 +78,9 @@ class LabJsWrapper extends Component {
     console.log('This is the latest labjswrapper.js')
     var that = this;
 
-    const taskData = sessionStorage.getItem('PRLtaskd1taskData');
+    const taskData = localStorage.getItem('PRLtaskd1taskData');
     if (taskData) {
-      console.log('taskData found in sessionStorage');
+      console.log('taskData found in localStorage');
       const parsedData = JSON.parse(taskData);
       // If localhost, we're done at this point
       if (isLocalhost) {
@@ -93,7 +93,7 @@ class LabJsWrapper extends Component {
         return;
       }
       that.setState({sendingData: true});
-      console.log('Im tryna call aws cuz i have session storage stuff');
+      console.log('Im tryna call aws cuz i have local storage stuff');
       that.setState({sendingData: true});
       that.saveTaskDataWithRetry(parsedData, 11); // second number = how many attempts to make before giving up +1
     }
